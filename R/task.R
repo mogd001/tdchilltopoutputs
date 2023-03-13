@@ -9,7 +9,6 @@ df <- tibble(x, y)
 p <- ggplot(df, aes(x,y)) +
   geom_point()
 
-ggsave(paste0("outputs/data_", make.names(Sys.time()), ".png"), p, dpi = 300, width = 5, height = 5)
+fname <- paste0("outputs/data_", make.names(Sys.time()), ".png")
 
-
-
+ggsave(fname, p, dpi = 300, width = 5, height = 5)
