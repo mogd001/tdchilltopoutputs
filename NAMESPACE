@@ -1,2 +1,2 @@
 exportPattern("^[[:alpha:]]+")
-import(dplyr, ggplot2, lubridate, tdcR)
+import(dplyr, ggplot2, lubridate, glue, tdcR)

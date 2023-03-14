@@ -1,20 +1,48 @@
 library(dplyr)
 library(ggplot2)
 library(lubridate)
+library(glue)
 library(tdcR)
 
-x <- rnorm(1:10)
-y <- rnorm(1:10)
+sites <- get_sites(collection = "AllRainfall", synonyms = TRUE) %>%
+  mutate(
+    longitude_ = longitude,
+    latitude_ = latitude,
+    site_name = second_synonym
+  )
 
-df <- tibble(x, y)
+rainfall_data <- get_data_collection(collection = "AllRainfall", method = "Total", interval = "1 hour", time_interval = "P7D") %>%
+  rename(rainfall = value) %>%
+  mutate(
+    datetime = with_tz(datetime, "NZ") + hours(1), #
+    date = as.numeric(format(as.Date(datetime, t = "NZ"), "%Y%m%d")),
+    rainfall = round(rainfall, 2)
+  )
 
-p <- ggplot(df, aes(x,y)) +
-  geom_point()
+max_datetime <- max(rainfall_data$datetime)
+min_datetime <- max_datetime - days(7)
 
-fname <- paste0("outputs/data_", make.names(Sys.time()), ".png")
+rainfall_data_p7d <- rainfall_data %>%
+  filter(datetime >= min_datetime)
 
-ggsave(fname, p, dpi = 300, width = 5, height = 5)
+r_summary <- rainfall_data_p7d  %>%
+  group_by(site) %>%
+  summarise(
+    p7d_rainfall_total = round(sum(rainfall, na.rm = TRUE), 0),
+    p7d_max_hrly_rainfall = round(max(rainfall, na.rm = TRUE), 0)
+  ) %>%
+  left_join(sites, by = "site")
 
+p <- ggplot(r_summary, aes(x = reorder(site_name, -p7d_rainfall_total), y = p7d_rainfall_total,
+                           text = paste("Site:", site_name, "\n 7 Day Rainfall Total:", p7d_rainfall_total, "mm"))) +
+  geom_bar(color = "black", alpha = 0.6, stat = "identity") +
+  geom_text(mapping = aes(label = p7d_rainfall_total), size = 2, vjust = -1) +
+  theme_bw() +
+  labs(x = "", y = "Rainfall Total (mm)", title = glue("Rainfall P7D (mm) {min_datetime} - {max_datetime}  [NZDT]")) + #caption = glue("at {now_plot})"
+  scale_y_continuous(limits = c(0, max(r_summary$p7d_rainfall_total * 1.05)), expand = c(0, NA)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+ggsave(glue("outputs/{as.Date(max_datetime, tz = 'NZ')}_rainfall_summary_p7days.png"), p, dpi = 300, height = 10, width = 16)
 
 # # Exploring upload to sharepoint
 # library(glue)
