@@ -52,7 +52,7 @@ jobs:
 
       - name: Install tdcR
         run:  |
-          Rscript -e "remotes::install_github('mogd001/tdcR', auth_token = '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')"
+          Rscript -e "remotes::install_github('mogd001/tdcR')"
 
       - name: Generate data
         run: |
