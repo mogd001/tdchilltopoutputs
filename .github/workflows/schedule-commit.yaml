@@ -49,6 +49,10 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 
+      - name: Install tdcR
+        run:  |
+          Rscript -e "remotes::install_github('mogd001/tdcR', auth_token = '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')"
+
       - name: Generate data
         run: |
           source("R/task.R")
