@@ -14,7 +14,7 @@ sites <- get_sites(collection = "AllRainfall", synonyms = TRUE) %>%
 rainfall_data <- get_data_collection(collection = "AllRainfall", method = "Total", interval = "1 hour", time_interval = "P7D") %>%
   rename(rainfall = value) %>%
   mutate(
-    datetime = with_tz(datetime, "NZ") + hours(1), #
+    datetime = with_tz(datetime, "NZ") + hours(1), # Handling rainfall total right bound time presentation e.g. 8 for 7am - 8am rainfall total.
     date = as.numeric(format(as.Date(datetime, t = "NZ"), "%Y%m%d")),
     rainfall = round(rainfall, 2)
   )
@@ -65,18 +65,12 @@ if (file.exists("log.txt")) {
   close(fileConn)
 }
 
-# # Exploring upload to sharepoint
+# Exploring upload to sharepoint
 # library(glue)
 # library(Microsoft365R)
 #
 # list_sharepoint_sites()
 #
 # site <- get_sharepoint_site(site_name = "Environmental Monitoring")
-#
-#
-#
 # site$list_drives()
-#
-# site$get_drive()$list_items("Reports and Analyses")
-#
-# site$get_drive()$upload_file(glue("{fname}"), glue("Reports and Analyses/R Outputs/{fname}"))
+# site$get_drive("Reports and Analyses")$upload_file(glue("outputs/2023-03-15_rainfall_summary_p7days.png"), glue("R Outputs/2023-03-15_rainfall_summary_p7days.png"))
