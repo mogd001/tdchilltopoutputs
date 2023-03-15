@@ -47,7 +47,7 @@ p <- ggplot(r_summary, aes(
 ggsave(glue("outputs/{as.Date(max_datetime, tz = 'NZ')}_rainfall_summary_p7days.png"), p, dpi = 300, height = 10, width = 16)
 
 # get current time
-now <- Sys.time()
+now <- with_tz(Sys.time(), tz = "NZ")
 
 # create a string with current time and "completed" text
 text <- paste("Completed at:", now)
